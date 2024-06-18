@@ -1,0 +1,11 @@
+/* form login */
+.form-login {
+  width: 35%;
+}
+
+/* mobile pages */
+@media (max-width: 768px) {
+  .form-login {
+    width: 90%;
+  }
+}
