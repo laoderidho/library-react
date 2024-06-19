@@ -12,17 +12,23 @@ const ProtectedRoute = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await axios.get(`${api}/profile`, {
+                const response = await axios.get(`${api}/auth/profile`, {
                     headers: {
                         Authorization: token
                     }
                 });
-                setProfileData(response.data);
-            } catch (error) {
-                if (axios.isAxiosError(error) && error.response?.status === 401) {
-                    navigate('/login', { state: { from: location.pathname } });
-                } else if (axios.isAxiosError(error) && error.response?.status === 404) {
-                    console.log(error.response.status);
+                const { data } = response;
+                setProfileData(data);
+
+                // Check role and redirect accordingly
+                if (data.role === 'admin' && !location.pathname.startsWith('/member')) {
+                    navigate('/admin');
+                }
+                 else if (data.role === 'user' && location.pathname.startsWith('/admin')) {
+                    navigate('/member');
+                }
+            } catch (error: any) {
+                if (error.response?.status === 401 || error.response?.status === 404) {
                     navigate('/login', { state: { from: location.pathname } });
                 } else {
                     console.error(error);
@@ -37,7 +43,7 @@ const ProtectedRoute = () => {
         }
     }, [token, navigate, location.pathname]);
 
-    return <Outlet />;
+    return profileData ? <Outlet /> : null; // Render nothing while loading
 };
 
 export default ProtectedRoute;
